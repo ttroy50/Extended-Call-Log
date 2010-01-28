@@ -3,8 +3,8 @@ Section: user/other
 Priority: optional
 Maintainer: Thom Troy <ttroy50@gmail.com>
 Build-Depends: debhelper (>= 5), libhildondesktop1-dev, libgtk2.0-dev, libgconf2-dev
-               libgtk2.0-dev, libosso-gnomevfs2-dev, libglib2.0-dev, libdbus-glib-1-dev,  libhildonfm2-dev
-               libosso-dev, librtcom-eventlogger-dev, libosso-abook-dev, maemo-optify
+               libosso-gnomevfs2-dev, libglib2.0-dev, libdbus-glib-1-dev,  libhildonfm2-dev
+               libosso-dev, librtcom-eventlogger-dev, librtcom-eventlogger-ui-dev, libosso-abook-dev, maemo-optify
 Standards-Version: 3.7.2
 
 Package: extcalllog
