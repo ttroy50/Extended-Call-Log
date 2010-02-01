@@ -1,5 +1,5 @@
 Source: extcalllog
-Section: user/other
+Section: user/network
 Priority: optional
 Maintainer: Thom Troy <ttroy50@gmail.com>
 Build-Depends: debhelper (>= 5), libhildondesktop1-dev, libgtk2.0-dev, libgconf2-dev,
