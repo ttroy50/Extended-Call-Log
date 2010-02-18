@@ -1,0 +1,12 @@
+extcalllog (0.2) unstable; urgency=low
+
+  * added UI to configure limit of calls show
+  * Fixed issue with icon
+
+ -- Thom Troy <ttroy50@gmail.com>  Thu, 18 Jan 2010 22:01:00 -0600
+ 
+extcalllog (0.1) unstable; urgency=low
+
+  * First Release
+
+ -- Thom Troy <ttroy50@gmail.com>  Thu, 28 Jan 2010 23:01:00 -0600
