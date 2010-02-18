@@ -422,6 +422,132 @@ refresh(
     rtcom_log_model_refresh(model);
 }
 
+
+
+void wizard_response(GtkDialog *dialog,
+        gint       response_id,
+        gint *response)
+{
+	*response = response_id;
+
+}
+
+
+static gboolean
+some_page_func (GtkNotebook *nb,
+                gint current,
+                gpointer data)
+{
+	g_debug("checking page");
+	GtkWidget *entry;
+	entry = gtk_notebook_get_nth_page (nb, current);
+	GList *children = gtk_container_get_children(GTK_CONTAINER(entry));
+
+	/* Validate data and if valid set the app settings*/
+	switch (current) {
+		case 0:
+		{
+			g_debug("page 0");
+			HildonEntry *limit;
+			limit= HILDON_ENTRY(g_list_nth_data(children, 1));
+
+
+			const gchar *limit_s = hildon_entry_get_text (HILDON_ENTRY(limit));
+			char *pstr = limit_s;
+			g_debug("checking int");
+			while (*pstr) {
+			    if (!g_ascii_isdigit(*pstr))
+			    {
+			    	g_debug("false");
+			    	return FALSE;
+			    }
+			    pstr++;
+			}
+
+			g_debug("casting to int");
+			gint tmp = atoi(limit_s);
+			g_debug("setting limit");
+			set_limit(tmp);
+			g_debug("limit set");
+
+
+		}
+	}
+
+	return TRUE;
+}
+
+create_settings_wizard(AppData *appdata)
+{
+	g_debug("creating settings...");
+	GtkWidget *wizard, *notebook;
+	GtkWidget *limit_label;
+	GtkWidget *limit_entry;
+	GtkWidget *main_vbox;
+
+	notebook = gtk_notebook_new ();
+
+	main_vbox = gtk_vbox_new(FALSE, 8);
+
+
+	limit_label = gtk_label_new ("Limit");
+
+
+	limit_entry = hildon_entry_new (HILDON_SIZE_AUTO);
+	g_object_set (G_OBJECT (limit_entry), "hildon-input-mode", HILDON_GTK_INPUT_MODE_NUMERIC, NULL);
+	/*
+	 * Set Default or already set values
+	 */
+	g_debug("getting limit");
+	gint limit = get_limit();
+	gchar * limit_string = g_strdup_printf("%d", limit);
+
+
+	hildon_entry_set_text (HILDON_ENTRY(limit_entry), limit_string);
+	g_free(limit_string);
+	g_debug("default limit set");
+
+	gtk_box_pack_start (GTK_BOX (main_vbox), limit_label, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_vbox), limit_entry, FALSE, FALSE, 0);
+
+	/* Append pages */
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), main_vbox, NULL);
+
+	wizard = hildon_wizard_dialog_new(GTK_WINDOW(appdata->mainWindow), "Settings", GTK_NOTEBOOK(notebook));
+
+	gint response = 0;
+	g_signal_connect (G_OBJECT (wizard),
+		                  "response",
+		                  G_CALLBACK (wizard_response),
+		                  &response);
+
+	/* Set a function to decide if user can go to next page  */
+	hildon_wizard_dialog_set_forward_page_func (HILDON_WIZARD_DIALOG (wizard),
+	                                            some_page_func, appdata, NULL);
+
+	g_debug("showing settings...");
+	gtk_widget_show_all (wizard);
+	gtk_dialog_run (GTK_DIALOG (wizard));
+	gtk_widget_destroy(GTK_WIDGET(wizard));
+	return response;
+}
+
+static void
+settings_clicked(
+        GtkWidget * widget,
+        gpointer user_data)
+{
+	RTComLogModel * model = NULL;
+    AppData * appdata = user_data;
+
+    g_debug("Create Settings...");
+    create_settings_wizard(appdata);
+    g_debug("Refreshing...");
+    rtcom_log_model_set_limit(appdata->log_model, get_limit());
+    rtcom_log_model_refresh(appdata->log_model);
+}
+
+
 static gint
 dbus_callback (const gchar *interface, const gchar *method,
                GArray *arguments, gpointer data,
@@ -454,6 +580,7 @@ int main( int argc, char* argv[] )
 	GtkWidget * missed_button = NULL;
     GtkWidget * all_button = NULL;
     GtkWidget * voip_button = NULL;
+    GtkWidget * settings_button = NULL;
     HildonAppMenu *menu;
 
     GtkWidget * scrolled_window = NULL;
@@ -536,6 +663,15 @@ int main( int argc, char* argv[] )
               appdata.log_model);
     hildon_app_menu_append (menu, GTK_BUTTON (refresh_button));
     gtk_widget_show(refresh_button);
+
+    settings_button = gtk_button_new_with_label("Settings");
+    g_signal_connect(
+             G_OBJECT(settings_button),
+              "clicked",
+              G_CALLBACK(settings_clicked),
+              &appdata);
+    hildon_app_menu_append (menu, GTK_BUTTON (settings_button));
+    gtk_widget_show(settings_button);
 
     /*setup the filters for the app menu*/
     all_button = hildon_gtk_radio_button_new (HILDON_SIZE_AUTO, NULL);
