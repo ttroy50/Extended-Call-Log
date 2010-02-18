@@ -48,7 +48,7 @@ G_BEGIN_DECLS
  * Please do not modify "APP_NAME" (or other defines) to different name
  */
 #define APP_NAME "extcalllog"
-#define APP_VER "0.1"
+#define APP_VER "0.2"
 #define APP_SERVICE "org.maemo.extcalllog"
 #define APP_METHOD "/org/maemo/extcalllog"
 /* end defines */
