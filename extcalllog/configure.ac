@@ -43,6 +43,10 @@ AC_SUBST(RTCOM_EVENTLOGGER_UI_LIBS)
 
 PKG_CHECK_MODULES(OSSOSETTINGS, osso-af-settings >= 0.8.4)
 
+# Application icon install directories
+icon_26x26dir=$datadir/icons/hicolor/26x26/hildon
+icon_48x48dir=$datadir/icons/hicolor/48x48/hildon
+
 localedir=`$PKG_CONFIG osso-af-settings --variable=localedir`
 hildondesktopentrydir=/usr/share/dbus-1/services
 hildoncpdesktopentrydir=/usr/
