@@ -484,6 +484,7 @@ create_settings_wizard(AppData *appdata)
 	GtkWidget *limit_label;
 	GtkWidget *limit_entry;
 	GtkWidget *main_vbox;
+	GtkWidget *done_label;
 
 	notebook = gtk_notebook_new ();
 
@@ -491,7 +492,8 @@ create_settings_wizard(AppData *appdata)
 
 
 	limit_label = gtk_label_new ("Limit");
-
+	done_label = gtk_label_new(
+			"Your settings are now configured.");
 
 	limit_entry = hildon_entry_new (HILDON_SIZE_AUTO);
 	g_object_set (G_OBJECT (limit_entry), "hildon-input-mode", HILDON_GTK_INPUT_MODE_NUMERIC, NULL);
@@ -512,6 +514,7 @@ create_settings_wizard(AppData *appdata)
 
 	/* Append pages */
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), main_vbox, NULL);
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), done_label, NULL);
 
 	wizard = hildon_wizard_dialog_new(GTK_WINDOW(appdata->mainWindow), "Settings", GTK_NOTEBOOK(notebook));
 
