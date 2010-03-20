@@ -41,6 +41,7 @@
 #include "rtcom-eventlogger-ui/rtcom-log-model.h"
 #include "rtcom-eventlogger-ui/rtcom-log-columns.h"
 #include "rtcom-eventlogger-ui/rtcom-log-search-bar.h"
+#include "settings.h"
 
 G_BEGIN_DECLS
 
@@ -65,6 +66,9 @@ typedef struct
 	GtkWidget * search_bar;
 	RTComElQueryGroupBy static_group_by;
 	gboolean showing_details;
+	AppSettings settings;
+	gint current_type;
+	gint current_direction;
 
 } AppData;
 

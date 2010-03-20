@@ -22,7 +22,7 @@ bin_PROGRAMS = \
 
 # Sources
 extcalllog_SOURCES = \
-        src/main.c src/main.h
+        src/main.c src/main.h src/settings.c src/settings.h src/filters.c src/filters.h
 # /Sources
 
 # LDADD
