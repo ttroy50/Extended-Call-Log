@@ -436,23 +436,62 @@ some_page_func (GtkNotebook *nb,
 	return TRUE;
 }
 
+void all_default (GtkButton* button, gpointer data)
+{
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+	{
+		return;
+	}
+	AppData* appdata = data;
+	appdata->settings.default_type = ALL;
+	set_default_type(ALL);
+}
+
+void voip_default (GtkButton* button, gpointer data)
+{
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+	{
+		return;
+	}
+	AppData* appdata = data;
+	appdata->settings.default_type = VOIP;
+	set_default_type(VOIP);
+}
+
+void gsm_default (GtkButton* button, gpointer data)
+{
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
+	{
+		return;
+	}
+	AppData* appdata = data;
+	appdata->settings.default_type = GSM;
+	set_default_type(GSM);
+
+}
 create_settings_wizard(AppData *appdata)
 {
 	g_debug("creating settings...");
 	GtkWidget *wizard, *notebook;
 	GtkWidget *limit_label;
 	GtkWidget *limit_entry;
+	GtkWidget *all_button, *voip_button, *gsm_button;
 	GtkWidget *main_vbox;
+	GtkWidget *type_vbox;
+	GtkWidget *done_desc_label;
 	GtkWidget *done_label;
+	GtkWidget *type_label;
 
 	notebook = gtk_notebook_new ();
 
 	main_vbox = gtk_vbox_new(FALSE, 8);
+	type_vbox = gtk_vbox_new(FALSE, 8);
 
 
+	/*
+	 * Setup the limit page
+	 */
 	limit_label = gtk_label_new ("Limit");
-	done_label = gtk_label_new(
-			"Your settings are now configured.");
 
 	limit_entry = hildon_entry_new (HILDON_SIZE_AUTO);
 	g_object_set (G_OBJECT (limit_entry), "hildon-input-mode", HILDON_GTK_INPUT_MODE_NUMERIC, NULL);
@@ -471,9 +510,81 @@ create_settings_wizard(AppData *appdata)
 	gtk_box_pack_start (GTK_BOX (main_vbox), limit_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (main_vbox), limit_entry, FALSE, FALSE, 0);
 
+	/*
+	 * default type page
+	 */
+	type_label = gtk_label_new ("Default Call Type");
+
+	all_button = hildon_gtk_radio_button_new(HILDON_SIZE_AUTO , NULL);
+	gtk_button_set_label(GTK_BUTTON(all_button), "All Types");
+	gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(all_button), FALSE);
+	hildon_gtk_widget_set_theme_size(all_button, HILDON_SIZE_FINGER_HEIGHT);
+	gtk_widget_show(all_button);
+
+	g_signal_connect(
+	 		G_OBJECT(all_button),
+	        "clicked",
+	        G_CALLBACK(all_default),
+	        appdata);
+
+	voip_button = hildon_gtk_radio_button_new_from_widget(HILDON_SIZE_AUTO , GTK_RADIO_BUTTON(all_button));
+	gtk_button_set_label(GTK_BUTTON(voip_button), "VoIP");
+	gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(voip_button), FALSE);
+	hildon_gtk_widget_set_theme_size(voip_button, HILDON_SIZE_FINGER_HEIGHT);
+	gtk_widget_show(voip_button);
+
+	g_signal_connect(
+	     	G_OBJECT(voip_button),
+	        "clicked",
+	        G_CALLBACK(voip_default),
+	        appdata);
+
+	gsm_button = hildon_gtk_radio_button_new_from_widget(HILDON_SIZE_AUTO , GTK_RADIO_BUTTON(voip_button));
+	gtk_button_set_label(GTK_BUTTON(gsm_button), "GSM");
+	gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(gsm_button), FALSE);
+	hildon_gtk_widget_set_theme_size(gsm_button, HILDON_SIZE_FINGER_HEIGHT);
+	gtk_widget_show(gsm_button);
+
+    g_signal_connect(
+    		G_OBJECT(gsm_button),
+	        "clicked",
+	        G_CALLBACK(gsm_default),
+	        appdata);
+
+	switch(appdata->settings.default_type)
+	{
+		case ALL:
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(all_button), TRUE);
+			break;
+		}
+		case VOIP:
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(voip_button), TRUE);
+			break;
+		}
+		case GSM:
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gsm_button), TRUE);
+			break;
+		}
+	}
+	gtk_box_pack_start (GTK_BOX (type_vbox), all_button, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (type_vbox), voip_button, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (type_vbox), gsm_button, FALSE, FALSE, 0);
+
+
+	/*
+	 * Done page
+	 */
+	done_label = gtk_label_new("Finished");
+	done_desc_label = gtk_label_new(
+				"Your settings are now configured.");
+
 	/* Append pages */
 	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), main_vbox, NULL);
-	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), done_label, NULL);
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), type_vbox, type_label);
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), done_desc_label, done_label);
 
 	wizard = hildon_wizard_dialog_new(GTK_WINDOW(appdata->mainWindow), "Settings", GTK_NOTEBOOK(notebook));
 
@@ -567,7 +678,8 @@ int main( int argc, char* argv[] )
     }
 
     gint limit = get_limit();
-    appdata.current_type = get_default_type();
+    appdata.settings.default_type = get_default_type();
+    appdata.current_type = appdata.settings.default_type;
     appdata.current_direction = ALL_DIRECTIONS;
 
     /* Create the hildon program and setup the title */
@@ -591,11 +703,15 @@ int main( int argc, char* argv[] )
 
     rtcom_log_model_set_group_by(appdata.log_model, appdata.static_group_by);
     eventlogger = rtcom_log_model_get_eventlogger(appdata.log_model);
+    /*
     const gchar * services[] = {"RTCOM_EL_SERVICE_CALL", NULL};
 
     g_debug("Populating calls...");
 
     rtcom_log_model_populate(appdata.log_model, services);
+    */
+    populate_calls_default(&appdata);
+
     rtcom_log_search_bar_set_model(
             RTCOM_LOG_SEARCH_BAR(appdata.search_bar),
             appdata.log_model);
