@@ -45,8 +45,10 @@
 #include "dbus/dbus.h"
 
 #include "localisation.h"
+#include "settings.h"
+#include "filters.h"
 
-#define DEFAULT_LIMIT 30
+
 
 static void
 get_time_string (
@@ -280,149 +282,106 @@ static void button_clicked (GtkButton* button, gpointer data)
     gtk_main_quit();
 }
 
-static gboolean set_limit(gint limit)
+
+
+
+
+
+static void call_type_dialog(GtkButton* button, gpointer data)
 {
-	/* Get the default client */
-	GConfClient *client = gconf_client_get_default();
+    GtkWidget *dialog;
+    GtkWidget *box;
 
-	gconf_client_add_dir (client, "/apps/extcalllog",
-	                GCONF_CLIENT_PRELOAD_NONE, NULL);
+    GtkWidget *all_button;
+    GtkWidget *voip_button;
+    GtkWidget *gsm_button;
 
-	if(limit < -1 || limit == 0)
-		limit = DEFAULT_LIMIT;
+    AppData *appdata = data;
 
-	return gconf_client_set_int (client,
-			"/apps/extcalllog/limit",
-            limit,
-            NULL);
+
+
+    dialog = gtk_dialog_new_with_buttons("Call Type",
+			appdata->mainWindow,
+			GTK_DIALOG_MODAL,
+			GTK_STOCK_OK,
+			GTK_RESPONSE_OK,
+			NULL);
+
+    box = GTK_DIALOG(dialog)->vbox;
+
+    all_button = hildon_gtk_radio_button_new(HILDON_SIZE_AUTO , NULL);
+    gtk_button_set_label(GTK_BUTTON(all_button), "All Types");
+    gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(all_button), FALSE);
+    hildon_gtk_widget_set_theme_size(all_button, HILDON_SIZE_FINGER_HEIGHT);
+    gtk_widget_show(all_button);
+
+    g_signal_connect(
+    		G_OBJECT(all_button),
+            "clicked",
+            G_CALLBACK(all_call_types),
+            appdata);
+
+    voip_button = hildon_gtk_radio_button_new_from_widget(HILDON_SIZE_AUTO , GTK_RADIO_BUTTON(all_button));
+    gtk_button_set_label(GTK_BUTTON(voip_button), "VoIP");
+    gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(voip_button), FALSE);
+    hildon_gtk_widget_set_theme_size(voip_button, HILDON_SIZE_FINGER_HEIGHT);
+    gtk_widget_show(voip_button);
+
+    g_signal_connect(
+        	G_OBJECT(voip_button),
+            "clicked",
+            G_CALLBACK(voip_calls),
+            appdata);
+
+    gsm_button = hildon_gtk_radio_button_new_from_widget(HILDON_SIZE_AUTO , GTK_RADIO_BUTTON(voip_button));
+    gtk_button_set_label(GTK_BUTTON(gsm_button), "GSM");
+    gtk_toggle_button_set_mode(GTK_TOGGLE_BUTTON(gsm_button), FALSE);
+    hildon_gtk_widget_set_theme_size(gsm_button, HILDON_SIZE_FINGER_HEIGHT);
+    gtk_widget_show(gsm_button);
+
+    g_signal_connect(
+        	G_OBJECT(gsm_button),
+            "clicked",
+            G_CALLBACK(gsm_calls),
+            appdata);
+
+    switch(appdata->current_type)
+    {
+		case ALL:
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(all_button), TRUE);
+			break;
+		}
+		case VOIP:
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(voip_button), TRUE);
+			break;
+		}
+		case GSM:
+		{
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gsm_button), TRUE);
+			break;
+		}
+    }
+
+    gtk_box_pack_start (GTK_BOX (box), all_button, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (box), voip_button, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (box), gsm_button, FALSE, FALSE, 0);
+
+
+
+    /*GtkWidget *content_area = GTK_DIALOG(dialog)->vbox;
+    GtkWidget *content_widget = settings_widget_create(GTK_WINDOW(dialog));*/
+
+    /* Add the widget to the dialog
+    gtk_box_pack_start(GTK_BOX(content_area), content_widget, TRUE, TRUE, 10);*/
+
+    /* When a button (ok/cancel/etc.) is clicked or the dialog is closed - destroy it */
+    g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
+
+    gtk_dialog_run(GTK_DIALOG(dialog));
+
 }
-
-static gint get_limit()
-{
-	gint limit;
-	/* Get the default client */
-	GConfClient *client = gconf_client_get_default();
-
-	/*Add GConf node if absent*/
-	/*if(!gconf_client_dir_exists(client, GCONF_NODE, NULL))
-	{*/
-	gconf_client_add_dir (client, "/apps/extcalllog",
-	                GCONF_CLIENT_PRELOAD_NONE, NULL);
-
-	limit = gconf_client_get_int(client,"/apps/extcalllog/limit", NULL);
-
-	if(limit < -1 || limit == 0)
-	{
-		limit = DEFAULT_LIMIT;
-		set_limit(limit);
-	}
-
-	return limit;
-
-}
-
-
-
-static void missed_calls (GtkButton* button, gpointer data)
-{
-    g_debug("missed calls...");
-	RTComLogModel * model = NULL;
-    model = RTCOM_LOG_MODEL(data);
-    RTComElQuery *query = NULL;
-    RTComEl * eventlogger = NULL;
-    eventlogger = rtcom_log_model_get_eventlogger(model);
-    query = rtcom_el_query_new(eventlogger);
-    rtcom_el_query_prepare(query,
-    		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-    		"event-type", "RTCOM_EL_EVENTTYPE_CALL_MISSED", RTCOM_EL_OP_EQUAL,
-    		NULL);
-
-    rtcom_log_model_populate_query(model, query);
-    g_object_unref(query);
-}
-
-static void recieved_calls (GtkButton* button, gpointer data)
-{
-    g_debug("recieved calls...");
-	RTComLogModel * model = NULL;
-    model = RTCOM_LOG_MODEL(data);
-    RTComElQuery *query = NULL;
-    RTComEl * eventlogger = NULL;
-    eventlogger = rtcom_log_model_get_eventlogger(model);
-    query = rtcom_el_query_new(eventlogger);
-    rtcom_el_query_prepare(query,
-    		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-    		"event-type", "RTCOM_EL_EVENTTYPE_CALL_INBOUND", RTCOM_EL_OP_EQUAL,
-    		NULL);
-
-    rtcom_log_model_populate_query(model, query);
-    g_object_unref(query);
-}
-
-static void dialed_calls (GtkButton* button, gpointer data)
-{
-    g_debug("dialed calls...");
-    RTComLogModel * model = NULL;
-    model = RTCOM_LOG_MODEL(data);
-    RTComElQuery *query = NULL;
-    RTComEl * eventlogger = NULL;
-    eventlogger = rtcom_log_model_get_eventlogger(model);
-    query = rtcom_el_query_new(eventlogger);
-    rtcom_el_query_prepare(query,
-    		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-    		"event-type", "RTCOM_EL_EVENTTYPE_CALL_OUTBOUND", RTCOM_EL_OP_EQUAL,
-    		NULL);
-
-    rtcom_log_model_populate_query(model, query);
-    g_object_unref(query);
-}
-
-static void voip_calls (GtkButton* button, gpointer data)
-{
-    g_debug("voip calls...");
-    RTComLogModel * model = NULL;
-    model = RTCOM_LOG_MODEL(data);
-    RTComElQuery *query = NULL;
-    RTComEl * eventlogger = NULL;
-    eventlogger = rtcom_log_model_get_eventlogger(model);
-    query = rtcom_el_query_new(eventlogger);
-    rtcom_el_query_prepare(query,
-    		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-    		"local_uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
-    		NULL);
-
-    rtcom_log_model_populate_query(model, query);
-    g_object_unref(query);
-}
-
-static void
-populate_calls(
-        GtkWidget * widget,
-        gpointer data)
-{
-    RTComLogModel * model = NULL;
-    const gchar * services[] = {"RTCOM_EL_SERVICE_CALL", NULL};
-
-    g_debug("Populating calls...");
-
-    model = RTCOM_LOG_MODEL(data);
-    rtcom_log_model_populate(model, services);
-}
-
-static void
-refresh(
-        GtkWidget * widget,
-        gpointer data)
-{
-    RTComLogModel * model = NULL;
-
-    g_debug("Refreshing...");
-
-    model = RTCOM_LOG_MODEL(data);
-    rtcom_log_model_refresh(model);
-}
-
-
 
 void wizard_response(GtkDialog *dialog,
         gint       response_id,
@@ -540,7 +499,6 @@ settings_clicked(
         GtkWidget * widget,
         gpointer user_data)
 {
-	RTComLogModel * model = NULL;
     AppData * appdata = user_data;
 
     g_debug("Create Settings...");
@@ -571,6 +529,7 @@ int main( int argc, char* argv[] )
 	appdata.static_group_by = RTCOM_EL_QUERY_GROUP_BY_NONE;
 	appdata.showing_details = FALSE;
 
+
     osso_context_t *osso_cont;
 	osso_return_t ret;
 
@@ -582,7 +541,7 @@ int main( int argc, char* argv[] )
 	GtkWidget * recieved_button = NULL;
 	GtkWidget * missed_button = NULL;
     GtkWidget * all_button = NULL;
-    GtkWidget * voip_button = NULL;
+    GtkWidget * call_type_button = NULL;
     GtkWidget * settings_button = NULL;
     HildonAppMenu *menu;
 
@@ -608,6 +567,9 @@ int main( int argc, char* argv[] )
     }
 
     gint limit = get_limit();
+    appdata.current_type = get_default_type();
+    appdata.current_direction = ALL_DIRECTIONS;
+
     /* Create the hildon program and setup the title */
     appdata.program = HILDON_PROGRAM(hildon_program_get_instance());
     g_set_application_name("Extended Call Log");
@@ -663,7 +625,7 @@ int main( int argc, char* argv[] )
              G_OBJECT(refresh_button),
               "clicked",
               G_CALLBACK(refresh),
-              appdata.log_model);
+              &appdata);
     hildon_app_menu_append (menu, GTK_BUTTON (refresh_button));
     gtk_widget_show(refresh_button);
 
@@ -678,22 +640,22 @@ int main( int argc, char* argv[] )
 
     /*setup the filters for the app menu*/
     all_button = hildon_gtk_radio_button_new (HILDON_SIZE_AUTO, NULL);
-    gtk_button_set_label (GTK_BUTTON (all_button), "All Calls");
+    gtk_button_set_label (GTK_BUTTON (all_button), "All");
     g_signal_connect(
               G_OBJECT(all_button),
               "clicked",
               G_CALLBACK(populate_calls),
-              appdata.log_model);
+              &appdata);
     hildon_app_menu_add_filter (menu, GTK_BUTTON (all_button));
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (all_button), FALSE);
 
     dialed_button = hildon_gtk_radio_button_new_from_widget (HILDON_SIZE_AUTO, GTK_RADIO_BUTTON(all_button));
-    gtk_button_set_label (GTK_BUTTON (dialed_button), "Dialed");
+    gtk_button_set_label (GTK_BUTTON (dialed_button), "Dialled");
     g_signal_connect(
               G_OBJECT(dialed_button),
               "clicked",
               G_CALLBACK(dialed_calls),
-              appdata.log_model);
+              &appdata);
     hildon_app_menu_add_filter (menu, GTK_BUTTON (dialed_button));
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (dialed_button), FALSE);
 
@@ -703,7 +665,7 @@ int main( int argc, char* argv[] )
               G_OBJECT(recieved_button),
               "clicked",
               G_CALLBACK(recieved_calls),
-              appdata.log_model);
+              &appdata);
     hildon_app_menu_add_filter (menu, GTK_BUTTON (recieved_button));
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (recieved_button), FALSE);
 
@@ -713,19 +675,19 @@ int main( int argc, char* argv[] )
               G_OBJECT(missed_button),
               "clicked",
               G_CALLBACK(missed_calls),
-              appdata.log_model);
+              &appdata);
     hildon_app_menu_add_filter (menu, GTK_BUTTON (missed_button));
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (missed_button), FALSE);
 
 
-    /*voip_button = gtk_button_new_with_label("VoIP Calls");
+    call_type_button = gtk_button_new_with_label("Call Type");
     g_signal_connect(
-              G_OBJECT(voip_button),
+              G_OBJECT(call_type_button),
               "clicked",
-              G_CALLBACK(voip_calls),
-              appdata.log_model);
-    hildon_app_menu_append (menu, GTK_BUTTON (voip_button));
-    gtk_widget_show(voip_button);*/
+              G_CALLBACK(call_type_dialog),
+              &appdata);
+    hildon_app_menu_append (menu, GTK_BUTTON (call_type_button));
+    gtk_widget_show(call_type_button);
 
     gtk_widget_show_all (GTK_WIDGET (menu));
     hildon_window_set_app_menu (HILDON_WINDOW (appdata.mainWindow), menu);
