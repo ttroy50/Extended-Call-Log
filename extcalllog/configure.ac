@@ -77,7 +77,7 @@ AC_SUBST(USE_NLS)
 
 
 AC_CONFIG_FILES([
-    Makefile 
+    Makefile  
     src/Makefile
     data/Makefile 
     po/Makefile.in
