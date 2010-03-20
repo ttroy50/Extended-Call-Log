@@ -27,6 +27,7 @@ void dialed_calls (GtkButton* button, gpointer data);
 void voip_calls (GtkButton* button, gpointer data);
 void gsm_calls (GtkButton* button, gpointer data);
 void all_call_types (GtkButton* button, gpointer data);
+void all_call_directions (GtkButton* button, gpointer data);
 void populate_calls(GtkWidget * widget, gpointer data);
 void refresh(GtkWidget * widget, gpointer data);
 
