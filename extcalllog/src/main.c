@@ -644,7 +644,7 @@ int main( int argc, char* argv[] )
     g_signal_connect(
               G_OBJECT(all_button),
               "clicked",
-              G_CALLBACK(populate_calls),
+              G_CALLBACK(all_call_directions),
               &appdata);
     hildon_app_menu_add_filter (menu, GTK_BUTTON (all_button));
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (all_button), FALSE);

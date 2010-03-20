@@ -212,6 +212,22 @@ void all_call_types (GtkButton* button, gpointer data)
     g_object_unref(query);
 }
 
+void all_call_directions (GtkButton* button, gpointer data)
+{
+	AppData *appdata = data;
+	appdata->current_direction = ALL_DIRECTIONS;
+
+    g_debug("all directions...");
+    RTComElQuery *query = NULL;
+    RTComEl * eventlogger = NULL;
+    eventlogger = rtcom_log_model_get_eventlogger(appdata->log_model);
+    query = rtcom_el_query_new(eventlogger);
+
+    query_prepare(query, appdata->current_type, appdata->current_direction);
+
+    rtcom_log_model_populate_query(appdata->log_model, query);
+    g_object_unref(query);
+}
 
 void populate_calls(GtkWidget * widget, gpointer data)
 {
