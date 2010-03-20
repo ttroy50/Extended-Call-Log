@@ -274,6 +274,22 @@ void populate_calls(GtkWidget * widget, gpointer data)
     rtcom_log_model_populate(appdata->log_model, services);
 }
 
+void populate_calls_default(AppData* data)
+{
+	AppData *appdata = data;
+
+	g_debug("populationg calls for first time");
+	RTComElQuery *query = NULL;
+	RTComEl * eventlogger = NULL;
+	eventlogger = rtcom_log_model_get_eventlogger(appdata->log_model);
+	query = rtcom_el_query_new(eventlogger);
+
+	query_prepare(query, appdata->current_type, ALL_DIRECTIONS);
+
+	rtcom_log_model_populate_query(appdata->log_model, query);
+	g_object_unref(query);
+}
+
 void refresh(GtkWidget * widget, gpointer data)
 {
 	AppData *appdata = data;

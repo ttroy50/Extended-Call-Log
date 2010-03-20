@@ -10,6 +10,7 @@
 #include "rtcom-eventlogger-ui/rtcom-log-columns.h"
 #include "rtcom-eventlogger-ui/rtcom-log-search-bar.h"
 #include "settings.h"
+#include "main.h"
 
 G_BEGIN_DECLS
 
@@ -29,6 +30,7 @@ void gsm_calls (GtkButton* button, gpointer data);
 void all_call_types (GtkButton* button, gpointer data);
 void all_call_directions (GtkButton* button, gpointer data);
 void populate_calls(GtkWidget * widget, gpointer data);
+void populate_calls_default(AppData* data);
 void refresh(GtkWidget * widget, gpointer data);
 
 G_END_DECLS
