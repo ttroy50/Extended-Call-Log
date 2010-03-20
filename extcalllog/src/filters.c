@@ -92,6 +92,11 @@ void query_prepare(RTComElQuery* query, gint type, gint direction)
 
 void missed_calls (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_direction = MISSED;
 
@@ -113,6 +118,11 @@ void missed_calls (GtkButton* button, gpointer data)
 
 void recieved_calls (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_direction = INBOUND;
     g_debug("recieved calls...");
@@ -133,6 +143,11 @@ void recieved_calls (GtkButton* button, gpointer data)
 
 void dialed_calls (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_direction = OUTBOUND;
     g_debug("dialed calls...");
@@ -152,6 +167,11 @@ void dialed_calls (GtkButton* button, gpointer data)
 
 void voip_calls (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_type = VOIP;
 
@@ -172,6 +192,11 @@ void voip_calls (GtkButton* button, gpointer data)
 
 void gsm_calls (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_type = GSM;
 
@@ -193,6 +218,11 @@ void gsm_calls (GtkButton* button, gpointer data)
 
 void all_call_types (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_type = ALL;
 
@@ -214,6 +244,11 @@ void all_call_types (GtkButton* button, gpointer data)
 
 void all_call_directions (GtkButton* button, gpointer data)
 {
+	if(!gtk_toggle_button_get_active(button))
+	{
+		return;
+	}
+
 	AppData *appdata = data;
 	appdata->current_direction = ALL_DIRECTIONS;
 
