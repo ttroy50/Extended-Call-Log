@@ -22,7 +22,16 @@ bin_PROGRAMS = \
 
 # Sources
 extcalllog_SOURCES = \
-        src/main.c src/main.h src/settings.c src/settings.h src/filters.c src/filters.h
+        src/main.c src/main.h src/settings.c src/settings.h src/filters.c src/filters.h \
+        src/rtcom-eventlogger-ui/rtcom-log-columns.h \
+	    src/rtcom-eventlogger-ui/rtcom-log-model.h \
+	    src/rtcom-eventlogger-ui/rtcom-log-model.c \
+	    src/rtcom-eventlogger-ui/rtcom-log-search-bar.h \
+	    src/rtcom-eventlogger-ui/rtcom-log-search-bar.c \
+	    src/rtcom-eventlogger-ui/rtcom-log-view.h \
+	    src/rtcom-eventlogger-ui/rtcom-log-view.c \
+	    src/rtcom-eventlogger-ui/utf8.h \
+	    src/rtcom-eventlogger-ui/utf8.c
 # /Sources
 
 # LDADD
