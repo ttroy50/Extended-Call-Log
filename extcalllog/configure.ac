@@ -37,7 +37,18 @@ PKG_CHECK_MODULES(RTCOM_EVENTLOGGER, [rtcom-eventlogger])
 AC_SUBST(RTCOM_EVENTLOGGER_CFLAGS)
 AC_SUBST(RTCOM_EVENTLOGGER_LIBS)
 
-PKG_CHECK_MODULES(RTCOM_EVENTLOGGER_UI, [rtcom-eventlogger-ui])
+PKG_CHECK_MODULES(
+	RTCOM_EVENTLOGGER_UI,
+	glib-2.0
+	gobject-2.0
+	gtk+-2.0
+	hildon-1
+	rtcom-eventlogger >= 1.1
+	rtcom-eventlogger-plugins >= 1.0
+	dbus-1
+	libosso-abook-1.0 >= 4.20081010
+	libmcclient >= 5
+    gconf-2.0)
 AC_SUBST(RTCOM_EVENTLOGGER_UI_CFLAGS)
 AC_SUBST(RTCOM_EVENTLOGGER_UI_LIBS)
 
