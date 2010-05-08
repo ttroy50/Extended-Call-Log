@@ -40,6 +40,7 @@
 #include "rtcom-eventlogger-ui/rtcom-log-search-bar.h"
 #include <gconf/gconf.h>
 #include <gconf/gconf-client.h>
+#include <stdint.h>
 #include "main.h"
 #include "time.h"
 #include "dbus/dbus.h"
@@ -48,6 +49,11 @@
 #include "settings.h"
 #include "filters.h"
 
+#define CSD_CALL_BUS_NAME	"com.nokia.csd.Call"
+#define CSD_CALL_INTERFACE	"com.nokia.csd.Call"
+#define CSD_CALL_INSTANCE	"com.nokia.csd.Call.Instance"
+#define CSD_CALL_CONFERENCE	"com.nokia.csd.Call.Conference"
+#define CSD_CALL_PATH		"/com/nokia/csd/call"
 
 
 static void
@@ -93,6 +99,95 @@ get_time_string (
     } else {
         strftime (time_str, length, time_format, loc_time);
     }
+}
+
+
+
+static int send_method_call(const char *dest, const char *path,
+				const char *interface, const char *method,
+				DBusPendingCallNotifyFunction cb,
+				void *user_data, int type, ...)
+{
+	/*
+	 * ret = send_method_call(CSD_CALL_BUS_NAME, CSD_CALL_PATH,
+				CSD_CALL_INTERFACE, "CreateWith",
+				NULL, NULL,
+				DBUS_TYPE_STRING, &number,
+				DBUS_TYPE_UINT32, &flags,
+				DBUS_TYPE_INVALID);
+
+#define CSD_CALL_BUS_NAME	"com.nokia.csd.Call"
+#define CSD_CALL_INTERFACE	"com.nokia.csd.Call"
+#define CSD_CALL_INSTANCE	"com.nokia.csd.Call.Instance"
+#define CSD_CALL_CONFERENCE	"com.nokia.csd.Call.Conference"
+#define CSD_CALL_PATH		"/com/nokia/csd/call"
+	 */
+	DBusError * dberror = NULL;
+	DBusConnection * connection = dbus_bus_get(DBUS_BUS_SYSTEM, dberror);
+	if(dberror != NULL)
+	{
+		printf("dbus error\n");
+		printf("%s", dberror->message);
+		printf("\n");
+	}
+	DBusMessage *msg;
+	DBusPendingCall *call;
+	va_list args;
+
+	msg = dbus_message_new_method_call(dest, path, interface, method);
+	if (!msg) {
+		printf("unable to create dbus message");
+		error("Unable to allocate new D-Bus %s message", method);
+
+		return -1;
+	}
+
+	va_start(args, type);
+
+	if (!dbus_message_append_args_valist(msg, type, args)) {
+		dbus_message_unref(msg);
+		va_end(args);
+		return -1;
+	}
+
+	va_end(args);
+
+	if (!cb) {
+		printf("dbus send\n");
+		dbus_connection_send(connection, msg, NULL);
+		return 0;
+	}
+
+	if (!dbus_connection_send_with_reply(connection, msg, &call, -1)) {
+		error("Sending %s failed", method);
+		dbus_message_unref(msg);
+		return -1;
+	}
+
+	dbus_pending_call_set_notify(call, cb, user_data, NULL);
+	dbus_pending_call_unref(call);
+	dbus_message_unref(msg);
+	dbus_connection_unref(connection);
+	connection = NULL;
+
+	return 0;
+}
+
+static void make_call(GtkButton* button, gpointer data)
+{
+
+	int ret;
+	uint32_t flag = 0;
+	char * number = data;
+	printf("make call to %s", number);
+	printf("\n");
+
+	ret = send_method_call(CSD_CALL_BUS_NAME, CSD_CALL_PATH,
+					CSD_CALL_INTERFACE, "CreateWith",
+					NULL, NULL,
+					DBUS_TYPE_STRING, &number,
+					DBUS_TYPE_INT32, &flag,
+					DBUS_TYPE_INVALID);
 }
 
 static void delete_record(GtkButton* button, gpointer data)
@@ -223,6 +318,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 
 
 	delete_button = gtk_button_new_with_label("Delete");
+	hildon_gtk_widget_set_theme_size(delete_button, HILDON_SIZE_FINGER_HEIGHT);
 	g_signal_connect(
 	          G_OBJECT(delete_button),
 	          "clicked",
@@ -231,14 +327,16 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	gtk_box_pack_start(GTK_BOX(button_box), delete_button, FALSE, FALSE, 0);
 	gtk_widget_show(delete_button);
 
-	call_button = gtk_button_new_with_label("Call");
-	/*g_signal_connect(
-	          G_OBJECT(all_button),
+	call_button = gtk_button_new_with_label(" Call ");
+	hildon_gtk_widget_set_theme_size(call_button, HILDON_SIZE_FINGER_HEIGHT);
+	g_signal_connect(
+	          G_OBJECT(call_button),
 	          "clicked",
-	          G_CALLBACK(delete_record),
-	          event_id);*/
-	/*gtk_box_pack_start(GTK_BOX(button_box), call_button, FALSE, FALSE, 0);
-	gtk_widget_show(call_button);*/
+	          G_CALLBACK(make_call),
+	          remote_account);
+
+	gtk_box_pack_start(GTK_BOX(button_box), call_button, FALSE, FALSE, 0);
+	gtk_widget_show(call_button);
 
 	contact_button = gtk_button_new_with_label("Contact");
 	/*g_signal_connect(
