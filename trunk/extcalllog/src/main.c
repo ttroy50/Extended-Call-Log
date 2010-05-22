@@ -783,6 +783,7 @@ create_settings_wizard(AppData *appdata)
 	g_debug("creating settings...");
 	GtkWidget *wizard, *notebook;
 	GtkWidget *limit_label;
+	GtkWidget *desc_label;
 	GtkWidget *limit_entry;
 	GtkWidget *all_button, *voip_button, *gsm_button;
 	GtkWidget *main_vbox;
@@ -801,6 +802,7 @@ create_settings_wizard(AppData *appdata)
 	 * Setup the limit page
 	 */
 	limit_label = gtk_label_new ("Limit");
+	desc_label = gtk_label_new ("Number of calls to display.\n-1 for No Limit");
 
 	limit_entry = hildon_entry_new (HILDON_SIZE_AUTO);
 	g_object_set (G_OBJECT (limit_entry), "hildon-input-mode", HILDON_GTK_INPUT_MODE_NUMERIC, NULL);
@@ -818,6 +820,7 @@ create_settings_wizard(AppData *appdata)
 
 	gtk_box_pack_start (GTK_BOX (main_vbox), limit_label, FALSE, FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (main_vbox), limit_entry, FALSE, FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (main_vbox), desc_label, FALSE, FALSE, 0);
 
 	/*
 	 * default type page
