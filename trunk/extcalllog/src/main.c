@@ -56,6 +56,32 @@
 #define CSD_CALL_PATH		"/com/nokia/csd/call"
 
 
+static time_t date_to_epoch(gint year, gint month, gint day, gboolean start_of_day)
+{
+	time_t t;
+	struct tm time_str;
+	time_str.tm_year = year - 1900;
+	time_str.tm_mon = month;
+	time_str.tm_mday = day;
+	if(start_of_day)
+	{
+		time_str.tm_hour = 0;
+		time_str.tm_min = 0;
+		time_str.tm_sec = 1;
+	}
+	else
+	{
+		time_str.tm_hour = 23;
+		time_str.tm_min = 59;
+		time_str.tm_sec = 59;
+	}
+	time_str.tm_isdst = 0;
+
+	t = mktime(&time_str);
+	g_debug("time is %d", t);
+	return t;
+}
+
 static void
 get_time_string (
     gchar     *time_str,
@@ -380,8 +406,198 @@ static void button_clicked (GtkButton* button, gpointer data)
     gtk_main_quit();
 }
 
+static void toggle_date_filter (GtkButton* button, gpointer data)
+{
+	AppData *appdata = data;
+
+	if(hildon_check_button_get_active(HILDON_CHECK_BUTTON(button)))
+	{
+		g_debug("enabling date filter\n");
+		appdata->filter_by_date = TRUE;
+		return;
+	}
+
+	g_debug("disabling date filter\n");
+	appdata->filter_by_date = FALSE;
+
+}
 
 
+static void start_date_changed (HildonPickerButton* button, gpointer data)
+{
+	AppData *appdata = data;
+	gint day = 0;
+	gint month = 0;
+	gint year = 0;
+
+	hildon_date_button_get_date (HILDON_DATE_BUTTON(button), &year, &month, &day);
+	appdata->start_day = day;
+	appdata->start_month = month;
+	appdata->start_year = year;
+	g_debug("year %d, month %d, day %d", year, month, day);
+
+}
+
+static void end_date_changed (HildonPickerButton* button, gpointer data)
+{
+	AppData *appdata = data;
+	gint day = 0;
+	gint month = 0;
+	gint year = 0;
+
+	hildon_date_button_get_date (HILDON_DATE_BUTTON(button), &year, &month, &day);
+	appdata->end_day = day;
+	appdata->end_month = month;
+	appdata->end_year = year;
+	g_debug("year %d, month %d, day %d", year, month, day);
+
+}
+
+static void date_dialog_response (GtkDialog *dialog,
+                                     gint response_id, gpointer user_data)
+{
+	AppData *appdata = user_data;
+	time_t end_date;
+	time_t start_date;
+	if(appdata->filter_by_date)
+	{
+		g_debug("we will filter by date");
+		start_date = date_to_epoch(appdata->start_year, appdata->start_month, appdata->start_day, TRUE);
+
+		if(appdata->end_year != 0)
+			end_date = date_to_epoch(appdata->end_year, appdata->end_month, appdata->end_day, FALSE);
+		else
+			end_date = time(NULL);
+
+		g_debug("start date is %d", start_date);
+		g_debug("end date is %d", end_date);
+
+		if(start_date > end_date)
+		{
+			g_debug("start date greater than end date");
+			GtkWidget *banner = hildon_banner_show_information(GTK_WIDGET(appdata->mainWindow), NULL,
+					"Start Date must be before End date. Disabling filter");
+			appdata->filter_by_date = FALSE;
+			gtk_widget_destroy(GTK_WIDGET(dialog));
+			return;
+		}
+		else
+		{
+			g_debug("end date greater than start date so can continue");
+			appdata->start_date = (int)start_date;
+			appdata->end_date = (int)end_date;
+			filter_by_date(appdata);
+
+		}
+	}
+	else
+	{
+		g_debug("we won't filter by date");
+	}
+
+	gtk_widget_destroy(dialog);
+}
+
+static void date_dialog(GtkButton* button, gpointer data)
+{
+    GtkWidget *dialog;
+    GtkWidget *box;
+
+    GtkWidget *date_toggle_button;
+    GtkWidget *start_date_button;
+    GtkWidget *end_date_button;
+
+    AppData *appdata = data;
+
+
+
+    dialog = gtk_dialog_new_with_buttons("Date",
+			appdata->mainWindow,
+			GTK_DIALOG_MODAL,
+			GTK_STOCK_OK,
+			GTK_RESPONSE_OK,
+			NULL);
+
+    box = GTK_DIALOG(dialog)->vbox;
+
+
+
+    start_date_button = hildon_date_button_new(HILDON_SIZE_FINGER_HEIGHT, HILDON_BUTTON_ARRANGEMENT_VERTICAL);
+    hildon_button_set_title(HILDON_BUTTON(start_date_button), "Start Date");
+    if(appdata->start_year != 0)
+    {
+    	hildon_date_button_set_date(HILDON_DATE_BUTTON(start_date_button),
+    			appdata->start_year, appdata->start_month, appdata->start_day);
+    }
+    else
+    {
+    	hildon_date_button_get_date (HILDON_DATE_BUTTON(start_date_button), &appdata->start_year,
+    			&appdata->start_month, &appdata->start_day);
+    }
+
+    g_signal_connect(
+        	G_OBJECT(start_date_button),
+            "value-changed",
+            G_CALLBACK(start_date_changed),
+            appdata);
+    gtk_widget_show(start_date_button);
+
+    end_date_button = hildon_date_button_new(HILDON_SIZE_FINGER_HEIGHT, HILDON_BUTTON_ARRANGEMENT_VERTICAL);
+    hildon_button_set_title(HILDON_BUTTON(end_date_button), "End Date");
+    if(appdata->end_year != 0)
+    {
+    	hildon_date_button_set_date(HILDON_DATE_BUTTON(end_date_button),
+    			appdata->end_year, appdata->end_month, appdata->end_day);
+    }
+    else
+    {
+     	hildon_date_button_get_date (HILDON_DATE_BUTTON(end_date_button), &appdata->end_year,
+     			&appdata->end_month, &appdata->end_day);
+    }
+
+    g_signal_connect(
+            G_OBJECT(end_date_button),
+            "value-changed",
+            G_CALLBACK(end_date_changed),
+            appdata);
+    gtk_widget_show(end_date_button);
+
+    date_toggle_button = hildon_check_button_new(HILDON_SIZE_AUTO );
+    gtk_button_set_label(GTK_BUTTON(date_toggle_button), "Filter By Date");
+
+    if(appdata->filter_by_date)
+    	hildon_check_button_set_active(HILDON_CHECK_BUTTON(date_toggle_button), TRUE);
+    else
+    	hildon_check_button_set_active(HILDON_CHECK_BUTTON(date_toggle_button), FALSE);
+
+    hildon_gtk_widget_set_theme_size(date_toggle_button, HILDON_SIZE_FINGER_HEIGHT);
+    gtk_widget_show(date_toggle_button);
+
+    g_signal_connect(
+    		G_OBJECT(date_toggle_button),
+            "toggled",
+            G_CALLBACK(toggle_date_filter),
+            appdata);
+
+    gtk_box_pack_start (GTK_BOX (box), date_toggle_button, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (box), start_date_button, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (box), end_date_button, FALSE, FALSE, 0);
+
+
+
+
+    /*GtkWidget *content_area = GTK_DIALOG(dialog)->vbox;
+    GtkWidget *content_widget = settings_widget_create(GTK_WINDOW(dialog));*/
+
+    /* Add the widget to the dialog
+    gtk_box_pack_start(GTK_BOX(content_area), content_widget, TRUE, TRUE, 10);*/
+
+    /* When a button (ok/cancel/etc.) is clicked or the dialog is closed - destroy it */
+    g_signal_connect(dialog, "response", G_CALLBACK(date_dialog_response), appdata);
+
+    gtk_dialog_run(GTK_DIALOG(dialog));
+
+}
 
 
 
@@ -467,14 +683,6 @@ static void call_type_dialog(GtkButton* button, gpointer data)
     gtk_box_pack_start (GTK_BOX (box), gsm_button, FALSE, FALSE, 0);
 
 
-
-    /*GtkWidget *content_area = GTK_DIALOG(dialog)->vbox;
-    GtkWidget *content_widget = settings_widget_create(GTK_WINDOW(dialog));*/
-
-    /* Add the widget to the dialog
-    gtk_box_pack_start(GTK_BOX(content_area), content_widget, TRUE, TRUE, 10);*/
-
-    /* When a button (ok/cancel/etc.) is clicked or the dialog is closed - destroy it */
     g_signal_connect(dialog, "response", G_CALLBACK(gtk_widget_destroy), NULL);
 
     gtk_dialog_run(GTK_DIALOG(dialog));
@@ -737,6 +945,14 @@ int main( int argc, char* argv[] )
 	AppData appdata;
 	appdata.static_group_by = RTCOM_EL_QUERY_GROUP_BY_NONE;
 	appdata.showing_details = FALSE;
+	appdata.filter_by_date = FALSE;
+	appdata.start_day = 0;
+	appdata.start_month = 0;
+	appdata.start_year = 0;
+	appdata.end_day = 0;
+	appdata.end_month = 0;
+	appdata.end_year = 0;
+
 
 
     osso_context_t *osso_cont;
@@ -751,6 +967,7 @@ int main( int argc, char* argv[] )
 	GtkWidget * missed_button = NULL;
     GtkWidget * all_button = NULL;
     GtkWidget * call_type_button = NULL;
+    GtkWidget * date_button = NULL;
     GtkWidget * settings_button = NULL;
     HildonAppMenu *menu;
 
@@ -902,6 +1119,16 @@ int main( int argc, char* argv[] )
               &appdata);
     hildon_app_menu_append (menu, GTK_BUTTON (call_type_button));
     gtk_widget_show(call_type_button);
+
+
+    date_button = gtk_button_new_with_label("Date");
+    g_signal_connect(
+              G_OBJECT(date_button),
+              "clicked",
+              G_CALLBACK(date_dialog),
+              &appdata);
+    hildon_app_menu_append (menu, GTK_BUTTON (date_button));
+    gtk_widget_show(date_button);
 
     gtk_widget_show_all (GTK_WIDGET (menu));
     hildon_window_set_app_menu (HILDON_WINDOW (appdata.mainWindow), menu);
