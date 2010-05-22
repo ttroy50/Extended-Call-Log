@@ -27,24 +27,44 @@
 #include "rtcom-eventlogger-ui/rtcom-log-search-bar.h"
 
 
-void query_prepare(RTComElQuery* query, gint type, gint direction)
+void query_prepare(RTComElQuery* query, gpointer data)
 {
 	gchar * eventtype = NULL;
+	gint outgoing = -1;
+	AppData *appdata = data;
 
-	switch(direction){
+
+	if(appdata->filter_by_date)
+	{
+		//disable the limit filter because we want to get all calls between certain dates
+		rtcom_log_model_set_limit(appdata->log_model, -1);
+	}
+	else
+	{
+		//re-enable the limit filter
+		rtcom_log_model_set_limit(appdata->log_model, appdata->settings.limit);
+	}
+
+	switch(appdata->current_direction){
 		case INBOUND:
 		{
-			eventtype = "RTCOM_EL_EVENTTYPE_CALL_INBOUND";
+			g_debug("inbound");
+			eventtype = "RTCOM_EL_EVENTTYPE_CALL";
+			outgoing = 0;
 			break;
 		}
 		case OUTBOUND:
 		{
-			eventtype = "RTCOM_EL_EVENTTYPE_CALL_OUTBOUND";
+			g_debug("outbound");
+			eventtype = "RTCOM_EL_EVENTTYPE_CALL";
+			outgoing = 1;
 			break;
 		}
 		case MISSED:
 		{
+			g_debug("missed");
 			eventtype = "RTCOM_EL_EVENTTYPE_CALL_MISSED";
+			outgoing = 0;
 			break;
 		}
 		default:
@@ -54,55 +74,138 @@ void query_prepare(RTComElQuery* query, gint type, gint direction)
 
 	if(eventtype == NULL)
 	{
-		printf("eventype is null so all call types displayed\n");
-		if(type == GSM)
+		g_debug("eventype is null so all call types displayed\n");
+		if(appdata->current_type == GSM)
 		{
-			rtcom_el_query_prepare(query,
-		    	"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-		    	"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
-		    	NULL);
+			if(appdata->filter_by_date)
+			{
+				rtcom_el_query_prepare(query,
+				   	"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+				   	"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
+				   	"start-time", appdata->start_date, RTCOM_EL_OP_GREATER,
+				   	"start-time", appdata->end_date, RTCOM_EL_OP_LESS,
+				   	NULL);
+			}
+			else
+			{
+				rtcom_el_query_prepare(query,
+				 	"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+				  	"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
+				  	NULL);
+			}
+
 		}
-		else if(type == VOIP)
+		else if(appdata->current_type == VOIP)
 		{
-			rtcom_el_query_prepare(query,
-			 	"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-			   	"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
-			   	NULL);
+			if(appdata->filter_by_date)
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
+					"start-time", appdata->start_date, RTCOM_EL_OP_GREATER,
+					"start-time", appdata->end_date, RTCOM_EL_OP_LESS,
+					NULL);
+			}
+			else
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
+					NULL);
+			}
 		}
 		else
 		{
-			rtcom_el_query_prepare(query,
-				"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-				NULL);
+			if(appdata->filter_by_date)
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"start-time", appdata->start_date, RTCOM_EL_OP_GREATER,
+				   	"start-time", appdata->end_date, RTCOM_EL_OP_LESS,
+					NULL);
+			}
+			else
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					NULL);
+			}
 		}
 	}
 	else
 	{
-		printf("eventtype set\n");
-		printf("event type is %s", eventtype);
-		printf("\n");
-		if(type == GSM)
+		g_debug("eventtype set\n");
+		g_debug("event type is %s", eventtype);
+		g_debug("\n");
+		if(appdata->current_type == GSM)
 		{
-			rtcom_el_query_prepare(query,
-		    	"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-		    	"event-type", eventtype, RTCOM_EL_OP_EQUAL,
-		    	"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
-		    	NULL);
+			if(appdata->filter_by_date)
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"event-type", eventtype, RTCOM_EL_OP_EQUAL,
+					"outgoing", outgoing, RTCOM_EL_OP_EQUAL,
+					"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
+					"start-time", appdata->start_date, RTCOM_EL_OP_GREATER,
+				   	"start-time", appdata->end_date, RTCOM_EL_OP_LESS,
+					NULL);
+			}
+			else
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"outgoing", outgoing, RTCOM_EL_OP_EQUAL,
+					"event-type", eventtype, RTCOM_EL_OP_EQUAL,
+					"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
+					NULL);
+			}
 		}
-		else if(type == VOIP)
+		else if(appdata->current_type == VOIP)
 		{
-			rtcom_el_query_prepare(query,
-			 	"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-			 	"event-type", eventtype, RTCOM_EL_OP_EQUAL,
-			   	"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
-			   	NULL);
+			if(appdata->filter_by_date)
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"event-type", eventtype, RTCOM_EL_OP_EQUAL,
+					"outgoing", outgoing, RTCOM_EL_OP_EQUAL,
+					"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
+					"start-time", appdata->start_date, RTCOM_EL_OP_GREATER,
+				 	"start-time", appdata->end_date, RTCOM_EL_OP_LESS,
+					NULL);
+			}
+			else
+			{
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"event-type", eventtype, RTCOM_EL_OP_EQUAL,
+					"outgoing", outgoing, RTCOM_EL_OP_EQUAL,
+					"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
+					NULL);
+			}
 		}
 		else
 		{
-			rtcom_el_query_prepare(query,
-				"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
-				"event-type", eventtype, RTCOM_EL_OP_EQUAL,
-				NULL);
+			if(appdata->filter_by_date)
+			{
+				g_debug("creating date filter where event type set and call type all");
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"outgoing", outgoing, RTCOM_EL_OP_EQUAL,
+					"event-type", eventtype, RTCOM_EL_OP_EQUAL,
+					"start-time", appdata->start_date, RTCOM_EL_OP_GREATER,
+				 	"start-time", appdata->end_date, RTCOM_EL_OP_LESS,
+					NULL);
+
+			}
+			else
+			{
+				g_debug("creating filter where event type set and call type all");
+				rtcom_el_query_prepare(query,
+					"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
+					"outgoing", outgoing, RTCOM_EL_OP_EQUAL,
+					"event-type", eventtype, RTCOM_EL_OP_EQUAL,
+					NULL);
+			}
 		}
 	}
 }
@@ -127,7 +230,7 @@ void missed_calls (GtkButton* button, gpointer data)
     		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
     		"event-type", "RTCOM_EL_EVENTTYPE_CALL_MISSED", RTCOM_EL_OP_EQUAL,
     		NULL);*/
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -135,7 +238,7 @@ void missed_calls (GtkButton* button, gpointer data)
 
 void recieved_calls (GtkButton* button, gpointer data)
 {
-	if(!gtk_toggle_button_get_active(button))
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
 	{
 		return;
 	}
@@ -152,7 +255,7 @@ void recieved_calls (GtkButton* button, gpointer data)
     		"event-type", "RTCOM_EL_EVENTTYPE_CALL_INBOUND", RTCOM_EL_OP_EQUAL,
     		NULL);
     		*/
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -160,7 +263,7 @@ void recieved_calls (GtkButton* button, gpointer data)
 
 void dialed_calls (GtkButton* button, gpointer data)
 {
-	if(!gtk_toggle_button_get_active(button))
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
 	{
 		return;
 	}
@@ -176,7 +279,7 @@ void dialed_calls (GtkButton* button, gpointer data)
     		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
     		"event-type", "RTCOM_EL_EVENTTYPE_CALL_OUTBOUND", RTCOM_EL_OP_EQUAL,
     		NULL);*/
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -184,7 +287,7 @@ void dialed_calls (GtkButton* button, gpointer data)
 
 void voip_calls (GtkButton* button, gpointer data)
 {
-	if(!gtk_toggle_button_get_active(button))
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
 	{
 		return;
 	}
@@ -201,7 +304,7 @@ void voip_calls (GtkButton* button, gpointer data)
     		"service", "RTCOM_EL_SERVICE_CALL", RTCOM_EL_OP_EQUAL,
     		"local-uid", "ring/tel/ring", RTCOM_EL_OP_NOT_EQUAL,
     		NULL);*/
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -209,7 +312,7 @@ void voip_calls (GtkButton* button, gpointer data)
 
 void gsm_calls (GtkButton* button, gpointer data)
 {
-	if(!gtk_toggle_button_get_active(button))
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
 	{
 		return;
 	}
@@ -227,7 +330,7 @@ void gsm_calls (GtkButton* button, gpointer data)
     		"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
     		NULL);
     		*/
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -235,7 +338,7 @@ void gsm_calls (GtkButton* button, gpointer data)
 
 void all_call_types (GtkButton* button, gpointer data)
 {
-	if(!gtk_toggle_button_get_active(button))
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
 	{
 		return;
 	}
@@ -253,7 +356,7 @@ void all_call_types (GtkButton* button, gpointer data)
     		"local-uid", "ring/tel/ring", RTCOM_EL_OP_EQUAL,
     		NULL);
     		*/
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -261,7 +364,7 @@ void all_call_types (GtkButton* button, gpointer data)
 
 void all_call_directions (GtkButton* button, gpointer data)
 {
-	if(!gtk_toggle_button_get_active(button))
+	if(!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(button)))
 	{
 		return;
 	}
@@ -275,7 +378,7 @@ void all_call_directions (GtkButton* button, gpointer data)
     eventlogger = rtcom_log_model_get_eventlogger(appdata->log_model);
     query = rtcom_el_query_new(eventlogger);
 
-    query_prepare(query, appdata->current_type, appdata->current_direction);
+    query_prepare(query, appdata);
 
     rtcom_log_model_populate_query(appdata->log_model, query);
     g_object_unref(query);
@@ -296,15 +399,32 @@ void populate_calls_default(AppData* data)
 	AppData *appdata = data;
 
 	g_debug("populationg calls for first time");
+	appdata->current_direction = ALL_DIRECTIONS;
 	RTComElQuery *query = NULL;
 	RTComEl * eventlogger = NULL;
 	eventlogger = rtcom_log_model_get_eventlogger(appdata->log_model);
 	query = rtcom_el_query_new(eventlogger);
 
-	query_prepare(query, appdata->current_type, ALL_DIRECTIONS);
+	query_prepare(query, appdata);
 
 	rtcom_log_model_populate_query(appdata->log_model, query);
 	g_object_unref(query);
+}
+
+void filter_by_date (gpointer data)
+{
+	AppData *appdata = data;
+
+    g_debug("filtering by date");
+    RTComElQuery *query = NULL;
+    RTComEl * eventlogger = NULL;
+    eventlogger = rtcom_log_model_get_eventlogger(appdata->log_model);
+    query = rtcom_el_query_new(eventlogger);
+
+    query_prepare(query, appdata);
+
+    rtcom_log_model_populate_query(appdata->log_model, query);
+    g_object_unref(query);
 }
 
 void refresh(GtkWidget * widget, gpointer data)

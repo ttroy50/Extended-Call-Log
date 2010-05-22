@@ -38,7 +38,7 @@ typedef enum {
   MISSED
 } call_direction;
 
-void query_prepare(RTComElQuery* query, gint type, gint direction);
+void query_prepare(RTComElQuery* query, gpointer data);
 void missed_calls (GtkButton* button, gpointer data);
 void recieved_calls (GtkButton* button, gpointer data);
 void dialed_calls (GtkButton* button, gpointer data);
@@ -48,6 +48,7 @@ void all_call_types (GtkButton* button, gpointer data);
 void all_call_directions (GtkButton* button, gpointer data);
 void populate_calls(GtkWidget * widget, gpointer data);
 void populate_calls_default(AppData* data);
+void filter_by_date (gpointer data);
 void refresh(GtkWidget * widget, gpointer data);
 
 G_END_DECLS

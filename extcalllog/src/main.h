@@ -69,6 +69,15 @@ typedef struct
 	AppSettings settings;
 	gint current_type;
 	gint current_direction;
+	gboolean filter_by_date;
+	gint start_day;
+	gint start_month;
+	gint start_year;
+	gint start_date;
+	gint end_day;
+	gint end_month;
+	gint end_year;
+	gint end_date;
 
 } AppData;
 
