@@ -721,10 +721,13 @@ some_page_func (GtkNotebook *nb,
 			char *pstr = limit_s;
 			g_debug("checking int");
 			while (*pstr) {
-			    if (!g_ascii_isdigit(*pstr))
+			    if (!g_ascii_isdigit(*pstr) )
 			    {
-			    	g_debug("false");
-			    	return FALSE;
+			    	if(*pstr != '-')
+			    	{
+			    		g_debug("false %s", pstr);
+			    		return FALSE;
+			    	}
 			    }
 			    pstr++;
 			}
