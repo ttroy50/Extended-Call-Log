@@ -1087,7 +1087,7 @@ int main( int argc, char* argv[] )
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (all_button), FALSE);
 
     dialed_button = hildon_gtk_radio_button_new_from_widget (HILDON_SIZE_AUTO, GTK_RADIO_BUTTON(all_button));
-    gtk_button_set_label (GTK_BUTTON (dialed_button), "Dialled");
+    gtk_button_set_label (GTK_BUTTON (dialed_button), "Out");
     g_signal_connect(
               G_OBJECT(dialed_button),
               "clicked",
@@ -1097,7 +1097,7 @@ int main( int argc, char* argv[] )
     gtk_toggle_button_set_mode (GTK_TOGGLE_BUTTON (dialed_button), FALSE);
 
 	recieved_button = hildon_gtk_radio_button_new_from_widget (HILDON_SIZE_AUTO, GTK_RADIO_BUTTON(dialed_button));
-	gtk_button_set_label (GTK_BUTTON (recieved_button), "Received");
+	gtk_button_set_label (GTK_BUTTON (recieved_button), "In");
     g_signal_connect(
               G_OBJECT(recieved_button),
               "clicked",
