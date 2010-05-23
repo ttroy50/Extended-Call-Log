@@ -1031,6 +1031,8 @@ int main( int argc, char* argv[] )
 
     rtcom_log_model_populate(appdata.log_model, services);
     */
+    GtkWidget *banner = hildon_banner_show_information(GTK_WIDGET(appdata.mainWindow), NULL,
+    					"Loading calls may take time. Please be patient");
     populate_calls_default(&appdata);
 
     rtcom_log_search_bar_set_model(
