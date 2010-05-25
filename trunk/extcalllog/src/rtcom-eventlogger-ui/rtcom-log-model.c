@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "rtcom-eventlogger-ui/rtcom-log-model.h"
-#include "rtcom-eventlogger-ui/rtcom-log-columns.h"
+#include "rtcom-log-model.h"
+#include "rtcom-log-columns.h"
 
 #include <string.h>
 #include <hildon/hildon.h>

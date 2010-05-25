@@ -22,7 +22,7 @@
 
 #include <gtk/gtk.h>
 
-#include "rtcom-eventlogger-ui/rtcom-log-model.h"
+#include "rtcom-log-model.h"
 
 G_BEGIN_DECLS
 
