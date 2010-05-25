@@ -1,3 +1,14 @@
+extcalllog (0.4) unstable; urgency=low
+
+  * Added ability to filter by date
+  * Allow -1 in the limit to show all calls
+  * Show number in main list
+  * Added notification to warn that load times can be long
+  * Changed "Received" to "In" and "Dialled" to "Out" in filter
+  * Fixed issue with filters caused by new rtcom-eventlogger library and database in PR1.2
+
+ -- Thom Troy <ttroy50@gmail.com>  Tue, 25 May 2010 22:36:00 -0600
+ 
 extcalllog (0.3) unstable; urgency=low
 
   * Added call type to filter by GSM, VoIP or all
