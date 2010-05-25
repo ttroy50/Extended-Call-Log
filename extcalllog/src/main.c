@@ -493,9 +493,10 @@ static void date_dialog_response (GtkDialog *dialog,
 	else
 	{
 		g_debug("we won't filter by date");
+		filter_by_date(appdata);
 	}
 
-	gtk_widget_destroy(dialog);
+	gtk_widget_destroy(GTK_WIDGET(dialog));
 }
 
 static void date_dialog(GtkButton* button, gpointer data)
