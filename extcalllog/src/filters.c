@@ -37,12 +37,14 @@ void query_prepare(RTComElQuery* query, gpointer data)
 	if(appdata->filter_by_date)
 	{
 		//disable the limit filter because we want to get all calls between certain dates
+		g_debug("no limit because of date");
 		rtcom_log_model_set_limit(appdata->log_model, -1);
 	}
 	else
 	{
 		//re-enable the limit filter
-		rtcom_log_model_set_limit(appdata->log_model, appdata->settings.limit);
+		g_debug("using the limit");
+		rtcom_log_model_set_limit(appdata->log_model, get_limit());
 	}
 
 	switch(appdata->current_direction){
