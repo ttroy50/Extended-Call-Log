@@ -353,7 +353,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	gtk_box_pack_start(GTK_BOX(button_box), delete_button, FALSE, FALSE, 0);
 	gtk_widget_show(delete_button);
 
-	call_button = gtk_button_new_with_label(" Call ");
+	/*call_button = gtk_button_new_with_label(" Call ");
 	hildon_gtk_widget_set_theme_size(call_button, HILDON_SIZE_FINGER_HEIGHT);
 	g_signal_connect(
 	          G_OBJECT(call_button),
@@ -362,7 +362,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	          remote_account);
 
 	gtk_box_pack_start(GTK_BOX(button_box), call_button, FALSE, FALSE, 0);
-	gtk_widget_show(call_button);
+	gtk_widget_show(call_button);*/
 
 	contact_button = gtk_button_new_with_label("Contact");
 	/*g_signal_connect(
