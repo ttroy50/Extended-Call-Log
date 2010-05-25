@@ -29,7 +29,7 @@
 #include <glib/gi18n.h>
 
 #include <gconf/gconf-client.h>
-//#include <clockcore-public.h>
+/*#include <clockcore-public.h>*/
 
 #include <time.h>
 #include <clockd/libtime.h>
