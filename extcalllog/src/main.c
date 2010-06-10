@@ -232,6 +232,31 @@ static void delete_record(GtkButton* button, gpointer data)
 
 }
 
+static void show_contact(GtkButton* button, gpointer data)
+{
+	/*
+	 * I'd prefer to have the contact come up in a dialog popup but for some reason
+	 * the below code doesn't display the dialog properly.
+	GtkWidget *dialog;
+    OssoABookContact *contact = data;
+    GtkWidget *starter;
+    starter = GTK_WIDGET(osso_abook_touch_contact_starter_new_with_contact(NULL, contact));
+    dialog = GTK_WIDGET(osso_abook_touch_contact_starter_dialog_new(NULL, starter));
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(GTK_WIDGET(dialog));
+    */
+
+    GtkWidget *starter, *window;
+    OssoABookContact *contact = data;
+    starter = osso_abook_touch_contact_starter_new_with_contact(NULL, contact);
+    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_container_add (GTK_CONTAINER (window), starter);
+
+    gtk_widget_show (starter);
+    gtk_widget_show (window);
+
+}
+
 
 void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     GtkTreeViewColumn *column, gpointer user_data)
@@ -250,7 +275,6 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	GtkWidget * icon_widget, * remote_details;
 	GtkWidget * service_icon_widget, * local_details;
 	GtkWidget * delete_button, * call_button, * contact_button;
-
 
 	/* Get the information we want to display from the model.
 	 *
@@ -300,10 +324,10 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     get_time_string (time_str, 256, timestamp);
     g_debug("time : %s",  time_str);
 
-	g_debug("remote_name %s", remote_name);
-    g_debug("remote_account %s", remote_account);
-    g_debug("local_account %s", local_account);
-    g_debug("remote_uid %s", remote_uid);
+	g_printf("remote_name %s ", remote_name);
+    g_printf("remote_account %s ", remote_account);
+    g_printf("local_account %s ", local_account);
+    g_printf("remote_uid %s ", remote_uid);
     g_debug("group_uid %s", group_uid);
     g_debug("group_title %s", group_title);
     g_debug("service %s", service);
@@ -332,7 +356,24 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 
 
 	service_icon_widget = gtk_image_new_from_pixbuf(service_icon);
-	gchar * remote_str = g_strdup_printf("%s (%s)", remote_name, remote_account);
+
+	gchar * remote_str;
+	gboolean is_contact = FALSE;
+	if(remote_name == NULL || (*remote_name == '\0'))
+	{
+		g_printf("remote_name is null\n");
+		if(remote_uid == NULL || (*remote_uid == '\0'))
+			remote_str = g_strdup_printf("Unknown Number");
+		else
+			remote_str = g_strdup_printf("%s", remote_account);
+	}
+	else
+	{
+		g_printf("remote_name is not null\n");
+		is_contact = TRUE;
+		remote_str = g_strdup_printf("%s (%s)", remote_name, remote_account);
+	}
+
 	remote_details = gtk_label_new (remote_str);
 	gtk_box_pack_start(GTK_BOX(remote_box), service_icon_widget, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(remote_box), remote_details, FALSE, FALSE, 0);
@@ -353,25 +394,31 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	gtk_box_pack_start(GTK_BOX(button_box), delete_button, FALSE, FALSE, 0);
 	gtk_widget_show(delete_button);
 
-	/*call_button = gtk_button_new_with_label(" Call ");
-	hildon_gtk_widget_set_theme_size(call_button, HILDON_SIZE_FINGER_HEIGHT);
-	g_signal_connect(
-	          G_OBJECT(call_button),
-	          "clicked",
-	          G_CALLBACK(make_call),
-	          remote_account);
+	/*	call_button = gtk_button_new_with_label(" Call ");
 
-	gtk_box_pack_start(GTK_BOX(button_box), call_button, FALSE, FALSE, 0);
-	gtk_widget_show(call_button);*/
+		hildon_gtk_widget_set_theme_size(call_button, HILDON_SIZE_FINGER_HEIGHT);
+		g_signal_connect(
+				G_OBJECT(call_button),
+				"clicked",
+				G_CALLBACK(make_call),
+				remote_account);
 
-	contact_button = gtk_button_new_with_label("Contact");
-	/*g_signal_connect(
-	          G_OBJECT(all_button),
-	          "clicked",
-	          G_CALLBACK(delete_record),
-	          event_id);*/
-	/*gtk_box_pack_start(GTK_BOX(button_box), contact_button, FALSE, FALSE, 0);
-	gtk_widget_show(contact_button);*/
+		gtk_box_pack_start(GTK_BOX(button_box), call_button, FALSE, FALSE, 0);
+		gtk_widget_show(call_button);*/
+
+	//only display contact button if it's a contact
+	if(contact != NULL)
+	{
+		contact_button = gtk_button_new_with_label("Contact");
+		g_signal_connect(
+				  G_OBJECT(contact_button),
+				  "clicked",
+				  G_CALLBACK(show_contact),
+				  contact);
+		gtk_box_pack_start(GTK_BOX(button_box), contact_button, FALSE, FALSE, 0);
+		gtk_widget_show(contact_button);
+
+	}
 
 	gtk_box_pack_start(GTK_BOX(main_box), timestamp_box, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(main_box), remote_box, FALSE, FALSE, 0);
@@ -384,7 +431,6 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 
     hildon_program_add_window(data->program, HILDON_WINDOW(detailsWindow));
     gtk_widget_show_all (GTK_WIDGET(detailsWindow));
-
 
 	g_free (text);
 	g_free (remote_name);
