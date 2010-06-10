@@ -229,6 +229,8 @@ static void delete_record(GtkButton* button, gpointer data)
 	}
 
 	rtcom_el_delete_event(el, id, NULL);
+	GtkWidget *banner = hildon_banner_show_information(NULL, NULL,
+							"Call Deleted from Call Log");
 
 }
 
