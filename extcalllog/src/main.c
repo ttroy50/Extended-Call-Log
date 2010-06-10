@@ -330,8 +330,8 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     g_printf("remote_uid %s ", remote_uid);
     g_debug("group_uid %s", group_uid);
     g_debug("group_title %s", group_title);
-    g_debug("service %s", service);
-    g_debug("event_type %s", event_type);
+    g_printf("service %s", service);
+    g_printf("event_type %s", event_type);
     g_debug("count %d", count);
     g_debug("text %s", text);
     g_debug("event_id %d", event_id);
@@ -383,7 +383,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	local_details = gtk_label_new (local_str);
 	gtk_box_pack_start(GTK_BOX(local_box), local_details, FALSE, FALSE, 0);
 
-
+	gtk_box_set_spacing(GTK_BOX(button_box), 10);
 	delete_button = gtk_button_new_with_label("Delete");
 	hildon_gtk_widget_set_theme_size(delete_button, HILDON_SIZE_FINGER_HEIGHT);
 	g_signal_connect(
@@ -394,7 +394,9 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	gtk_box_pack_start(GTK_BOX(button_box), delete_button, FALSE, FALSE, 0);
 	gtk_widget_show(delete_button);
 
-	/*	call_button = gtk_button_new_with_label(" Call ");
+	if(strcmp(local_account, "ring/tel/ring") == 0 && (*remote_account != '\0'))
+	{
+		call_button = gtk_button_new_with_label(" Call Number ");
 
 		hildon_gtk_widget_set_theme_size(call_button, HILDON_SIZE_FINGER_HEIGHT);
 		g_signal_connect(
@@ -404,12 +406,13 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 				remote_account);
 
 		gtk_box_pack_start(GTK_BOX(button_box), call_button, FALSE, FALSE, 0);
-		gtk_widget_show(call_button);*/
+		gtk_widget_show(call_button);
+	}
 
 	//only display contact button if it's a contact
 	if(contact != NULL)
 	{
-		contact_button = gtk_button_new_with_label("Contact");
+		contact_button = gtk_button_new_with_label("Open Contact Card");
 		g_signal_connect(
 				  G_OBJECT(contact_button),
 				  "clicked",
