@@ -48,6 +48,7 @@
 #include "localisation.h"
 #include "settings.h"
 #include "filters.h"
+#include "he-about-dialog.h"
 
 #define CSD_CALL_BUS_NAME	"com.nokia.csd.Call"
 #define CSD_CALL_INTERFACE	"com.nokia.csd.Call"
@@ -455,6 +456,22 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 static void button_clicked (GtkButton* button, gpointer data)
 {
     gtk_main_quit();
+}
+
+static void aboutButton_clicked (GtkButton* button, gpointer data)
+{
+	AppData * appdata = data;
+	he_about_dialog_present(GTK_WINDOW(appdata->mainWindow),
+	                        "Extended Call Log",
+	                        NULL,
+	                        APP_VER,
+	                        "View your complete call history",
+	                        "(c) 2010 Thom Troy",
+	                        "http://extcalllog.garage.maemo.org",
+	                        "https://bugs.maemo.org/enter_bug.cgi?product=Extended%20Call%20Log",
+	                        "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3S5DWH4C95UG8");
+
+
 }
 
 static void toggle_date_filter (GtkButton* button, gpointer data)
@@ -1027,6 +1044,7 @@ int main( int argc, char* argv[] )
     GtkWidget * call_type_button = NULL;
     GtkWidget * date_button = NULL;
     GtkWidget * settings_button = NULL;
+    GtkWidget * about_button = NULL;
     HildonAppMenu *menu;
 
     GtkWidget * scrolled_window = NULL;
@@ -1189,6 +1207,15 @@ int main( int argc, char* argv[] )
               &appdata);
     hildon_app_menu_append (menu, GTK_BUTTON (date_button));
     gtk_widget_show(date_button);
+
+    about_button = gtk_button_new_with_label("About");
+    g_signal_connect(
+             G_OBJECT(about_button),
+             "clicked",
+              G_CALLBACK(aboutButton_clicked),
+              &appdata);
+    hildon_app_menu_append (menu, GTK_BUTTON (about_button));
+    gtk_widget_show(about_button);
 
     gtk_widget_show_all (GTK_WIDGET (menu));
     hildon_window_set_app_menu (HILDON_WINDOW (appdata.mainWindow), menu);
