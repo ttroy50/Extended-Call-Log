@@ -1,3 +1,17 @@
+extcalllog (0.5) unstable; urgency=low
+
+  * Add about box using he-about-dialog
+  * bug 9649 - Add option to call back a GSM contact
+  * Add option to open the contact card if the call is from a contact
+  * Unknown numbers now displayed correctly in detailsWindow
+  * Change how calls not from a contact display
+  * bug 10550 - display a banner when a call is deleted
+  * bug 10551 - close detailsWindow when that call is deleted
+  * single tap will now open detailsWindow. No need for double click any more
+  * display length of call if end-time db field in use (see trigger hack http://talk.maemo.org/showthread.php?t=42624)
+
+ -- Thom Troy <ttroy50@gmail.com>  Tue, 13 Jun 2010 23:53:00 -0600
+ 
 extcalllog (0.4) unstable; urgency=low
 
   * Added ability to filter by date
