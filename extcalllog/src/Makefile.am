@@ -8,4 +8,5 @@ EXTRA_DIST = \
 	rtcom-eventlogger-ui/rtcom-log-view.h \
 	rtcom-eventlogger-ui/rtcom-log-view.c \
 	rtcom-eventlogger-ui/utf8.h \
-	rtcom-eventlogger-ui/utf8.c
+	rtcom-eventlogger-ui/utf8.c \
+	he-about-dialog.h he-about-dialog.c
