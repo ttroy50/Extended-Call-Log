@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(extcalllog,0.4)
+AC_INIT(extcalllog,0.5)
 AM_CONFIG_HEADER(config.h)
 
 AM_INIT_AUTOMAKE([1.7.9])

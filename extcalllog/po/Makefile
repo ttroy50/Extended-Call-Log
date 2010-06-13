@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = extcalllog
 PACKAGE = extcalllog
-VERSION = 0.4
+VERSION = 0.5
 
 SHELL = /bin/sh
 
