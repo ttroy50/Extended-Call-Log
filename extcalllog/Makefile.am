@@ -23,6 +23,7 @@ bin_PROGRAMS = \
 # Sources
 extcalllog_SOURCES = \
         src/main.c src/main.h src/settings.c src/settings.h src/filters.c src/filters.h \
+        src/he-about-dialog.h src/he-about-dialog.c \
         src/rtcom-eventlogger-ui/rtcom-log-columns.h \
 	    src/rtcom-eventlogger-ui/rtcom-log-model.h \
 	    src/rtcom-eventlogger-ui/rtcom-log-model.c \
