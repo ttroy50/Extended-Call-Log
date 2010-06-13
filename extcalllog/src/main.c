@@ -281,7 +281,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	GtkWidget * local_box;
 	GtkWidget * button_box;
 
-	GtkWidget * timestamp_label;
+	GtkWidget * timestamp_label, *end_timestamp_label;
 	GtkWidget * icon_widget, * remote_details;
 	GtkWidget * service_icon_widget, * local_details;
 	GtkWidget * delete_button, * call_button, * contact_button;
@@ -297,6 +297,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     gchar *remote_account;
     gchar *text;
     gint timestamp;
+    gint end_timestamp;
     gint count;
     gchar *group_uid;
     gchar *group_title;
@@ -308,6 +309,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     const gchar *title_col = NULL;
     const gchar *name_str = NULL;
     gchar time_str[256];
+    gchar end_time_str[256];
 
     GtkTreeIter iter;
     RTComLogModel *model = gtk_tree_view_get_model(tree_view);
@@ -319,6 +321,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
               RTCOM_LOG_VIEW_COL_REMOTE_NAME, &remote_name,
               RTCOM_LOG_VIEW_COL_REMOTE_ACCOUNT, &remote_uid,
               RTCOM_LOG_VIEW_COL_TIMESTAMP, &timestamp,
+              RTCOM_LOG_VIEW_COL_END_TIMESTAMP, &end_timestamp,
               RTCOM_LOG_VIEW_COL_COUNT, &count,
               RTCOM_LOG_VIEW_COL_GROUP_UID, &group_uid,
               RTCOM_LOG_VIEW_COL_GROUP_TITLE, &group_title,
@@ -334,10 +337,17 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     get_time_string (time_str, 256, timestamp);
     g_debug("time : %s",  time_str);
 
+    if(end_timestamp != 0)
+    {
+    	get_time_string (end_time_str, 256, end_timestamp);
+    	g_debug("end_time : %s",  end_time_str);
+    }
+
 	g_printf("remote_name %s ", remote_name);
     g_printf("remote_account %s ", remote_account);
     g_printf("local_account %s ", local_account);
     g_printf("remote_uid %s ", remote_uid);
+    g_printf("end_timestamp %d", end_timestamp);
     g_debug("group_uid %s", group_uid);
     g_debug("group_title %s", group_title);
     g_printf("service %s", service);
@@ -361,8 +371,27 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 
 	icon_widget = gtk_image_new_from_pixbuf(icon);
 	timestamp_label = gtk_label_new (time_str);
+
 	gtk_box_pack_start(GTK_BOX(timestamp_box), icon_widget, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(timestamp_box), timestamp_label, FALSE, FALSE, 0);
+	if(end_timestamp != 0)
+	{
+		gint length = end_timestamp - timestamp;
+		if(length > 0)
+		{
+			gint minutes = length / 60;
+			gint seconds = length - (minutes * 60);
+
+			gchar *length_str;
+			if(length < 60)
+				length_str = g_strdup_printf(" for 0m %ds", length);
+			else
+				length_str = g_strdup_printf(" for %dm %ds", minutes, seconds);
+
+			end_timestamp_label = gtk_label_new(length_str);
+			gtk_box_pack_start(GTK_BOX(timestamp_box), end_timestamp_label, FALSE, FALSE, 0);
+		}
+	}
 
 
 	service_icon_widget = gtk_image_new_from_pixbuf(service_icon);
