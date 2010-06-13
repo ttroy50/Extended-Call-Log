@@ -260,6 +260,13 @@ static void show_contact(GtkButton* button, gpointer data)
 
 }
 
+static void delete_button_clicked (GtkButton* button, gpointer data)
+{
+	g_print("button clicked\n");
+	GtkWidget *detailsWindow = GTK_WIDGET(data);
+	gtk_widget_destroy(detailsWindow);
+
+}
 
 void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
     GtkTreeViewColumn *column, gpointer user_data)
@@ -394,6 +401,11 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	          "clicked",
 	          G_CALLBACK(delete_record),
 	          event_id);
+	g_signal_connect(
+		          G_OBJECT(delete_button),
+		          "clicked",
+		          G_CALLBACK(delete_button_clicked),
+		          detailsWindow);
 	gtk_box_pack_start(GTK_BOX(button_box), delete_button, FALSE, FALSE, 0);
 	gtk_widget_show(delete_button);
 
@@ -451,11 +463,6 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 		g_object_unref (contact);
 
 	data->showing_details = FALSE;
-}
-
-static void button_clicked (GtkButton* button, gpointer data)
-{
-    gtk_main_quit();
 }
 
 static void aboutButton_clicked (GtkButton* button, gpointer data)
