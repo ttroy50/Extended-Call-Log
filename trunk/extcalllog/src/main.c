@@ -465,6 +465,11 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	data->showing_details = FALSE;
 }
 
+void row_tapped(GtkTreeView *tree_view, GtkTreePath *path, gpointer user_data)
+{
+	row_activated(tree_view, path, NULL, user_data);
+}
+
 static void aboutButton_clicked (GtkButton* button, gpointer data)
 {
 	AppData * appdata = data;
@@ -1241,8 +1246,11 @@ int main( int argc, char* argv[] )
                 GTK_CONTAINER(appdata.mainWindow),
                 box);
 
-    g_signal_connect(G_OBJECT(appdata.log_view), "row-activated",
-    		G_CALLBACK(row_activated), &appdata);
+    /*g_signal_connect(G_OBJECT(appdata.log_view), "row-activated",
+    		G_CALLBACK(row_activated), &appdata);*/
+
+    g_signal_connect(G_OBJECT(appdata.log_view), "hildon-row-tapped",
+       		G_CALLBACK(row_tapped), &appdata);
 
 
     /* Quit program when window is closed. */
