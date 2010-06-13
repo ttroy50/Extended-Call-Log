@@ -772,6 +772,7 @@ _stage_cached (gpointer data)
         const gchar * text;
         const gchar * icon_name;
         gint timestamp;
+        gint end_timestamp;
         gint count;
         const gchar * group_title;
         const gchar * event_type;
@@ -831,6 +832,7 @@ _stage_cached (gpointer data)
         staging_data.text = LOOKUP_STR ("content");
         staging_data.icon_name = LOOKUP_STR ("icon-name");
         staging_data.timestamp = LOOKUP_INT ("start-time");
+        staging_data.end_timestamp = LOOKUP_INT("end-time");
         staging_data.count = LOOKUP_INT ("event-count");
         staging_data.group_title = LOOKUP_STR ("group-title");
         staging_data.event_type = LOOKUP_STR ("event-type");
@@ -864,7 +866,7 @@ _stage_cached (gpointer data)
 
         g_debug("Staging event:\n\tid: %d\n\tservice: %s\n\tgroup_uid: %s\n\tlocal_uid: %s\n\tremote_uid: %s\n\t"
                 "remote_name: %s\n\tremote_ebook_uid: %s\n\ttext: %s\n\ticon_name: %s\n\t"
-                "timestamp: %d\n\tevents in group: %d\n\tgroup title: %s\n\tevent type: %s\n\t"
+                "timestamp: %d\n\tend_timestamp: %d\n\tevents in group: %d\n\tgroup title: %s\n\tevent type: %s\n\t"
                 "outgoing: %s\n\t flags: %d\n",
                 staging_data.event_id,
                 staging_data.service,
@@ -876,6 +878,7 @@ _stage_cached (gpointer data)
                 staging_data.text,
                 staging_data.icon_name,
                 staging_data.timestamp,
+                staging_data.end_timestamp,
                 staging_data.count,
                 staging_data.group_title,
                 staging_data.event_type,
@@ -921,6 +924,7 @@ _stage_cached (gpointer data)
 
                 RTCOM_LOG_VIEW_COL_TEXT,           staging_data.text,
                 RTCOM_LOG_VIEW_COL_TIMESTAMP,      staging_data.timestamp,
+                RTCOM_LOG_VIEW_COL_END_TIMESTAMP,   staging_data.end_timestamp,
                 RTCOM_LOG_VIEW_COL_COUNT,          staging_data.count,
                 RTCOM_LOG_VIEW_COL_GROUP_TITLE,    staging_data.group_title,
                 RTCOM_LOG_VIEW_COL_EVENT_TYPE,     staging_data.event_type,
@@ -1243,6 +1247,7 @@ _threaded_cached_load (gpointer data)
                         "content",
                         "icon-name",
                         "start-time",
+                        "end-time",
                         "event-count",
                         "group-title",
                         "event-type",
@@ -1401,6 +1406,7 @@ _new_event_callback (
                 "content",
                 "icon-name",
                 "start-time",
+                "end-time",
                 "event-count",
                 "group-title",
                 "event-type",
@@ -1752,6 +1758,7 @@ _event_deleted_callback (
                             "content",
                             "icon-name",
                             "start-time",
+                            "end-time",
                             "event-count",
                             "group-title",
                             "event-type",
@@ -1869,6 +1876,7 @@ _event_deleted_callback (
                             "content",
                             "icon-name",
                             "start-time",
+                            "end-time",
                             "event-count",
                             "group-title",
                             "event-type",
@@ -2326,7 +2334,8 @@ rtcom_log_model_init(
         RTCOM_LOG_VIEW_COL_TYPE_14,
         RTCOM_LOG_VIEW_COL_TYPE_15,
         RTCOM_LOG_VIEW_COL_TYPE_16,
-        RTCOM_LOG_VIEW_COL_TYPE_17
+        RTCOM_LOG_VIEW_COL_TYPE_17,
+        RTCOM_LOG_VIEW_COL_TYPE_18
     };
 
     gtk_list_store_set_column_types(
@@ -2697,6 +2706,7 @@ rtcom_log_model_populate_query(
                     "content",
                     "icon-name",
                     "start-time",
+                    "end-time",
                     "event-count",
                     "group-title",
                     "event-type",
