@@ -453,7 +453,7 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 		gtk_widget_show(call_button);
 	}
 
-	//only display contact button if it's a contact
+	/*only display contact button if it's a contact*/
 	if(contact != NULL)
 	{
 		contact_button = gtk_button_new_with_label("Open Contact Card");
