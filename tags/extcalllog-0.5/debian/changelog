@@ -1,0 +1,46 @@
+extcalllog (0.5) unstable; urgency=low
+
+  * Add about box using he-about-dialog
+  * bug 9649 - Add option to call back a GSM contact
+  * Add option to open the contact card if the call is from a contact
+  * Unknown numbers now displayed correctly in detailsWindow
+  * Change how calls not from a contact display
+  * bug 10550 - display a banner when a call is deleted
+  * bug 10551 - close detailsWindow when that call is deleted
+  * single tap will now open detailsWindow. No need for double click any more
+  * display length of call if end-time db field in use (see trigger hack http://talk.maemo.org/showthread.php?t=42624)
+
+ -- Thom Troy <ttroy50@gmail.com>  Tue, 13 Jun 2010 23:53:00 -0600
+ 
+extcalllog (0.4) unstable; urgency=low
+
+  * Added ability to filter by date
+  * Allow -1 in the limit to show all calls
+  * Show number in main list
+  * Added notification to warn that load times can be long
+  * Changed "Received" to "In" and "Dialled" to "Out" in filter
+  * Fixed issue with filters caused by new rtcom-eventlogger library and database in PR1.2
+
+ -- Thom Troy <ttroy50@gmail.com>  Tue, 25 May 2010 22:36:00 -0600
+ 
+extcalllog (0.3) unstable; urgency=low
+
+  * Added call type to filter by GSM, VoIP or all
+  * Added default call type to settings
+  * Added a done page to the settings wizard to improve UX
+  * Changed uuencoded icon in control file to 48x48 image
+
+ -- Thom Troy <ttroy50@gmail.com>  Thu, 20 Mar 2010 22:01:00 -0600
+ 
+extcalllog (0.2) unstable; urgency=low
+
+  * added UI to configure limit of calls show
+  * Fixed issue with icon
+
+ -- Thom Troy <ttroy50@gmail.com>  Thu, 18 Jan 2010 22:01:00 -0600
+ 
+extcalllog (0.1) unstable; urgency=low
+
+  * First Release
+
+ -- Thom Troy <ttroy50@gmail.com>  Thu, 28 Jan 2010 23:01:00 -0600

@@ -1,0 +1,61 @@
+Source: extcalllog
+Section: user/network
+Priority: optional
+Maintainer: Thom Troy <ttroy50@gmail.com>
+Build-Depends: debhelper (>= 5), libhildondesktop1-dev, libgtk2.0-dev, libgconf2-dev,
+               libosso-gnomevfs2-dev, libglib2.0-dev, libdbus-glib-1-dev,  libhildonfm2-dev, osso-af-settings,
+               libosso-dev, librtcom-eventlogger-dev (>= 1.1), librtcom-eventlogger-plugins-dev (>= 1.0), 
+               libosso-abook-dev, libmcclient-dev (>= 5), libcityinfo-dev, libtime-dev, libosso-abook-dev (>= 4.20081010),
+               maemo-optify
+Standards-Version: 3.7.2
+
+Package: extcalllog
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: View complete call history
+XSBC-Bugtracker: https://bugs.maemo.org/enter_bug.cgi?product=Extended%20Call%20Log
+XB-Maemo-Display-Name: Extended Call Log
+XB-Maemo-Icon-26:
+ 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
+ ====
