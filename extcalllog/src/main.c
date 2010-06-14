@@ -390,6 +390,8 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 
 			end_timestamp_label = gtk_label_new(length_str);
 			gtk_box_pack_start(GTK_BOX(timestamp_box), end_timestamp_label, FALSE, FALSE, 0);
+			if(length_str != NULL)
+				g_free (length_str);
 		}
 	}
 
@@ -416,7 +418,6 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	remote_details = gtk_label_new (remote_str);
 	gtk_box_pack_start(GTK_BOX(remote_box), service_icon_widget, FALSE, FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(remote_box), remote_details, FALSE, FALSE, 0);
-	g_free(remote_str);
 
 	gchar * local_str = g_strdup_printf("Account : (%s)", local_account);
 	local_details = gtk_label_new (local_str);
@@ -486,6 +487,10 @@ void row_activated(GtkTreeView *tree_view, GtkTreePath *path,
 	g_free (group_title);
 	g_free (service);
 	g_free (event_type);
+	g_free (local_str);
+	if(remote_str != NULL)
+		g_free (remote_str);
+
 
 
 	if (contact != NULL)
