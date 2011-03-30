@@ -63,6 +63,7 @@ typedef struct
 	HildonStackableWindow *mainWindow;
 	GtkWidget * log_view;
 	RTComLogModel * log_model;
+	GtkWidget * scrolled_window;
 	GtkWidget * search_bar;
 	RTComElQueryGroupBy static_group_by;
 	gboolean showing_details;

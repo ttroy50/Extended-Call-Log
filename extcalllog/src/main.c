@@ -504,6 +504,24 @@ void row_tapped(GtkTreeView *tree_view, GtkTreePath *path, gpointer user_data)
 	row_activated(tree_view, path, NULL, user_data);
 }
 
+void cursor_changed(GtkTreeView *tree_view, gpointer user_data)
+{
+	AppData * appdata = user_data;
+	GtkTreePath *path = 0;
+	GdkRectangle rect;
+	gint x = 0;
+	gint y = 0;
+
+	gtk_tree_view_get_cursor(tree_view,&path,NULL);
+	gtk_tree_view_get_background_area (GTK_TREE_VIEW (tree_view),
+	                                    path, NULL, &rect);
+	gtk_tree_view_convert_bin_window_to_tree_coords (GTK_TREE_VIEW (tree_view),
+	                                                  0, rect.y, NULL, &y);
+	hildon_pannable_area_scroll_to ((HildonPannableArea *)appdata->scrolled_window, x, y);
+	gtk_tree_path_free (path);
+
+}
+
 static void aboutButton_clicked (GtkButton* button, gpointer data)
 {
 	AppData * appdata = data;
@@ -1093,7 +1111,7 @@ int main( int argc, char* argv[] )
     GtkWidget * about_button = NULL;
     HildonAppMenu *menu;
 
-    GtkWidget * scrolled_window = NULL;
+    appdata.scrolled_window = NULL;
 
 	locale_init();
 
@@ -1270,11 +1288,10 @@ int main( int argc, char* argv[] )
 
 	/* setup the pannable area to show the calls */
     box = gtk_vbox_new(FALSE, 10);
-    scrolled_window = hildon_pannable_area_new();
+    appdata.scrolled_window = hildon_pannable_area_new();
+    hildon_pannable_area_add_with_viewport((HildonPannableArea *)appdata.scrolled_window, appdata.log_view);
 
-    hildon_pannable_area_add_with_viewport((HildonPannableArea *)scrolled_window, appdata.log_view);
-
-    gtk_box_pack_start(GTK_BOX(box), scrolled_window, TRUE, TRUE, 2);
+    gtk_box_pack_start(GTK_BOX(box), appdata.scrolled_window, TRUE, TRUE, 2);
     gtk_box_pack_start(GTK_BOX(box), appdata.search_bar, FALSE, FALSE, 0);
     gtk_container_add(
                 GTK_CONTAINER(appdata.mainWindow),
@@ -1285,6 +1302,9 @@ int main( int argc, char* argv[] )
 
     g_signal_connect(G_OBJECT(appdata.log_view), "hildon-row-tapped",
        		G_CALLBACK(row_tapped), &appdata);
+
+    g_signal_connect(G_OBJECT(appdata.log_view), "cursor-changed",
+       		G_CALLBACK(cursor_changed), &appdata);
 
 
     /* Quit program when window is closed. */
