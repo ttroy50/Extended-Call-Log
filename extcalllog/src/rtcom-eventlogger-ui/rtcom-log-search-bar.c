@@ -277,8 +277,9 @@ _key_release_event_cb(
                 return TRUE;
             }
         }
+        /* removed for Bug 12102
         if(GTK_WIDGET_HAS_FOCUS(priv->entry))
-            return FALSE;
+            return FALSE;*/
 
         return gtk_im_context_filter_keypress(priv->im_context, key);
     }
